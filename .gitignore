@@ -1,0 +1,11 @@
+# Dependencias de Node
+node_modules/
+dist/
+build/
+
+# Variables de entorno (credenciales de base de datos)
+.env
+
+# Archivos del sistema y logs
+npm-debug.log*
+.DS_Store

@@ -1,0 +1,24 @@
+// index.js
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+require('dotenv').config();
+
+const sequelize = require('./config/db');
+const productoController = require('./controllers/productoController');
+const { validarRegistroProducto } = require('./middlewares/validadorProducto');
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.use(morgan('dev')); 
+
+app.use(express.json()); 
+app.post('/api/productos', validarRegistroProducto, productoController.crearProducto);
+
