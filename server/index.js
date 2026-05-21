@@ -22,3 +22,13 @@ app.use(morgan('dev'));
 app.use(express.json()); 
 app.post('/api/productos', validarRegistroProducto, productoController.crearProducto);
 
+sequelize.sync({ force: false }) 
+  .then(() => {
+    console.log('✓ Conexión e integración con PostgreSQL exitosa.');
+    app.listen(PORT, () => {
+      console.log(`Servidor Express corriendo en el puerto ${PORT}`);
+    });
+  })
+  .catch(error => {
+    console.error('Error al inicializar la base de datos:', error.message);
+  });
