@@ -20,7 +20,11 @@ app.use(cors({
 app.use(morgan('dev')); 
 
 app.use(express.json()); 
+
+// Rutas de productos
 app.post('/api/productos', validarRegistroProducto, productoController.crearProducto);
+app.get('/api/productos', productoController.obtenerProductos);
+app.get('/api/productos/:id', productoController.obtenerProductoPorId);
 
 sequelize.sync({ force: false }) 
   .then(() => {
