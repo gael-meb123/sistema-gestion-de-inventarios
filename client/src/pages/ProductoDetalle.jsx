@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link, useParams } from 'react-router-dom'
+import { useCart } from '../context/CartContext.jsx'
+import { useAuth } from '../context/AuthContext.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function ProductoDetalle() {
+  const { addToCart } = useCart()
+  const { user } = useAuth()
+  const esAdmin = user?.rol === 'admin'
   const { id } = useParams()
   const [producto, setProducto] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -33,12 +38,30 @@ function ProductoDetalle() {
 
       {!loading && !error && producto && (
         <div>
+          {producto.imagenUrl && (
+            <img
+              src={`${API_BASE_URL}${producto.imagenUrl}`}
+              alt={producto.nombre}
+              className="producto-imagen-detalle"
+            />
+          )}
           <h3>{producto.nombre}</h3>
           <p>Precio: ${producto.precio}</p>
           <p>Stock: {producto.stock}</p>
           <p>Disponible: {producto.disponible ? 'Si' : 'No'}</p>
+          {!esAdmin && (
+            <p>
+              <button
+                type="button"
+                onClick={() => addToCart(producto)}
+                disabled={!producto.disponible}
+              >
+                Agregar al carrito
+              </button>
+            </p>
+          )}
           <p>
-            <Link className="link" to="/productos">Regresar al listado</Link>
+            <Link className="link" to="/">Regresar al listado</Link>
           </p>
         </div>
       )}
