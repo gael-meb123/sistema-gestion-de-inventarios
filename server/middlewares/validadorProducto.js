@@ -2,15 +2,31 @@
 const { z } = require('zod');
 const { validationResult } = require('express-validator');
 
+const numeroDesdeInput = (schema) => z.preprocess((valor) => {
+    if (typeof valor === 'string') {
+        const limpio = valor.trim();
+        if (limpio === '') {
+            return undefined;
+        }
+        return Number(limpio);
+    }
+    return valor;
+}, schema);
+
 // 1. Definición del esquema con Zod
 const productoEsquemaZod = z.object({
     nombre: z.string({ required_error: "El nombre es obligatorio" })
+        .trim()
         .min(2, "El nombre del producto debe tener al menos 2 caracteres"),
-    precio: z.number({ required_error: "El precio es obligatorio" })
-        .positive("El precio debe ser un número mayor a cero"),
-    stock: z.number({ required_error: "El stock es obligatorio" })
-        .int("El stock debe ser un número entero")
-        .nonnegative("El stock no puede ser un valor negativo"),
+    precio: numeroDesdeInput(
+        z.number({ required_error: "El precio es obligatorio", invalid_type_error: "El precio debe ser un número válido" })
+            .positive("El precio debe ser un número mayor a cero")
+    ),
+    stock: numeroDesdeInput(
+        z.number({ required_error: "El stock es obligatorio", invalid_type_error: "El stock debe ser un número válido" })
+            .int("El stock debe ser un número entero")
+            .nonnegative("El stock no puede ser un valor negativo")
+    ),
 });
 
 // 2. Middleware de interceptación
@@ -22,12 +38,14 @@ const validarRegistroProducto = (req, res, next) => {
     if (!resultadoZod.success) {
         // Damos formato a los errores de Zod para enviarlos de forma limpia al Frontend
         return res.status(400).json({
-            errores: resultadoZod.error.errors.map(err => ({
+            errores: resultadoZod.error.issues.map(err => ({
                 campo: err.path[0],
                 mensaje: err.message
             }))
         });
     }
+
+    req.body = resultadoZod.data;
 
     // Comprobación complementaria con express-validator por si se requiere auditoría extra de Express
     const erroresExpress = validationResult(req);

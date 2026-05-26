@@ -1,0 +1,228 @@
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import axios from 'axios'
+import { useAuth } from './AuthContext.jsx'
+
+const STORAGE_KEY = 'inventarios_carrito'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const CartContext = createContext(null)
+
+function leerCarritoInicial() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch (_error) {
+    return []
+  }
+}
+
+export function CartProvider({ children }) {
+  const { token, user, isAuthenticated, authLoading } = useAuth()
+  const esAdmin = user?.rol === 'admin'
+  const [items, setItems] = useState(leerCarritoInicial)
+  const [cartLoading, setCartLoading] = useState(false)
+  const [cartError, setCartError] = useState('')
+
+  const headers = useMemo(() => (
+    token ? { Authorization: `Bearer ${token}` } : {}
+  ), [token])
+
+  const normalizarItemsApi = (apiItems = []) => apiItems.map((item) => ({
+    id: item.productoId,
+    nombre: item.nombre,
+    precio: Number(item.precio) || 0,
+    imagenUrl: item.imagenUrl || null,
+    cantidad: item.cantidad,
+    stock: item.stock ?? 0,
+    disponible: Boolean(item.disponible),
+  }))
+
+  const setDesdeCarritoApi = (carrito) => {
+    setItems(normalizarItemsApi(carrito?.items || []))
+  }
+
+  const persistir = (nextItems) => {
+    setItems(nextItems)
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextItems))
+  }
+
+  useEffect(() => {
+    const cargarCarrito = async () => {
+      if (authLoading) {
+        return
+      }
+
+      if (!isAuthenticated) {
+        setItems(leerCarritoInicial())
+        return
+      }
+
+      if (esAdmin) {
+        setItems([])
+        setCartLoading(false)
+        return
+      }
+
+      setCartLoading(true)
+      setCartError('')
+
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/api/carrito`, { headers })
+        setDesdeCarritoApi(data.carrito)
+      } catch (error) {
+        setCartError(error.response?.data?.mensaje || 'No se pudo cargar el carrito')
+      } finally {
+        setCartLoading(false)
+      }
+    }
+
+    cargarCarrito()
+  }, [authLoading, isAuthenticated, esAdmin, headers])
+
+  const addToCart = async (producto) => {
+    setCartError('')
+
+    if (esAdmin) {
+      setCartError('El carrito no esta disponible para administradores')
+      return false
+    }
+
+    if (isAuthenticated) {
+      try {
+        const { data } = await axios.post(`${API_BASE_URL}/api/carrito/items`, {
+          productoId: producto.id,
+          cantidad: 1,
+        }, { headers })
+        setDesdeCarritoApi(data.carrito)
+        return true
+      } catch (error) {
+        setCartError(error.response?.data?.mensaje || 'No se pudo agregar al carrito')
+        return false
+      }
+    }
+
+    const existente = items.find((item) => item.id === producto.id)
+
+    if (existente) {
+      const next = items.map((item) => (
+        item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
+      ))
+      persistir(next)
+      return true
+    }
+
+    persistir([
+      ...items,
+      {
+        id: producto.id,
+        nombre: producto.nombre,
+        precio: Number(producto.precio) || 0,
+        imagenUrl: producto.imagenUrl || null,
+        cantidad: 1,
+      },
+    ])
+    return true
+  }
+
+  const removeFromCart = async (id) => {
+    setCartError('')
+
+    if (esAdmin) {
+      return false
+    }
+
+    if (isAuthenticated) {
+      try {
+        const { data } = await axios.delete(`${API_BASE_URL}/api/carrito/items/${id}`, { headers })
+        setDesdeCarritoApi(data.carrito)
+        return true
+      } catch (error) {
+        setCartError(error.response?.data?.mensaje || 'No se pudo eliminar el producto del carrito')
+        return false
+      }
+    }
+
+    persistir(items.filter((item) => item.id !== id))
+    return true
+  }
+
+  const changeQuantity = async (id, nextCantidad) => {
+    setCartError('')
+
+    if (esAdmin) {
+      return false
+    }
+
+    if (nextCantidad <= 0) {
+      return removeFromCart(id)
+    }
+
+    if (isAuthenticated) {
+      try {
+        const { data } = await axios.patch(`${API_BASE_URL}/api/carrito/items/${id}`, {
+          cantidad: nextCantidad,
+        }, { headers })
+        setDesdeCarritoApi(data.carrito)
+        return true
+      } catch (error) {
+        setCartError(error.response?.data?.mensaje || 'No se pudo actualizar la cantidad')
+        return false
+      }
+    }
+
+    const next = items.map((item) => (
+      item.id === id ? { ...item, cantidad: nextCantidad } : item
+    ))
+    persistir(next)
+    return true
+  }
+
+  const clearCart = async () => {
+    setCartError('')
+
+    if (esAdmin) {
+      return false
+    }
+
+    if (isAuthenticated) {
+      try {
+        const { data } = await axios.delete(`${API_BASE_URL}/api/carrito`, { headers })
+        setDesdeCarritoApi(data.carrito)
+        return true
+      } catch (error) {
+        setCartError(error.response?.data?.mensaje || 'No se pudo vaciar el carrito')
+        return false
+      }
+    }
+
+    persistir([])
+    return true
+  }
+
+  const totals = useMemo(() => {
+    const totalItems = items.reduce((acc, item) => acc + item.cantidad, 0)
+    const subtotal = items.reduce((acc, item) => acc + (item.precio * item.cantidad), 0)
+    return { totalItems, subtotal }
+  }, [items])
+
+  const value = useMemo(() => ({
+    items,
+    addToCart,
+    removeFromCart,
+    changeQuantity,
+    clearCart,
+    cartLoading,
+    cartError,
+    totalItems: totals.totalItems,
+    subtotal: totals.subtotal,
+  }), [items, totals, cartLoading, cartError])
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>
+}
+
+export function useCart() {
+  const context = useContext(CartContext)
+  if (!context) {
+    throw new Error('useCart debe usarse dentro de CartProvider')
+  }
+  return context
+}
