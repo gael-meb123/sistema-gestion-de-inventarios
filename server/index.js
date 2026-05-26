@@ -86,7 +86,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
  *       500:
  *         description: Error interno del servidor
  */
+app.use(express.json()); 
+
+// Rutas de productos
 app.post('/api/productos', validarRegistroProducto, productoController.crearProducto);
+app.get('/api/productos', productoController.obtenerProductos);
+app.get('/api/productos/:id', productoController.obtenerProductoPorId);
 
 sequelize.sync({ force: false })
   .then(() => {
