@@ -3,11 +3,12 @@ import { Link } from 'react-router-dom'
 function NotFound() {
   return (
     <section className="panel">
-      <h2>404 - Ruta no encontrada</h2>
-      <p>La ruta solicitada no existe.</p>
-      <p>
-        <Link className="link" to="/">Volver al inicio</Link>
-      </p>
+      <div className="empty-state">
+        <div className="empty-icon" style={{ fontSize: '3rem' }}>🌫️</div>
+        <p className="empty-title">404 — Página no encontrada</p>
+        <p className="empty-sub">La ruta que buscas no existe.</p>
+        <Link className="btn-primary-sm" to="/">Volver al inicio</Link>
+      </div>
     </section>
   )
 }
