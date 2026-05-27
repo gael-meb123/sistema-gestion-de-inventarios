@@ -18,15 +18,19 @@ function App() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <h1>Sistema de Inventarios</h1>
+        <NavLink to="/" end className="topbar-brand">
+          <span className="topbar-logo">⬡</span>
+          Inventarios
+        </NavLink>
         <nav>
-          <NavLink to="/" end>
-            Inicio
-          </NavLink>
+          <NavLink to="/" end>Inicio</NavLink>
           {!isAuthenticated && <NavLink to="/login">Login</NavLink>}
           {!isAuthenticated && <NavLink to="/registro">Registro</NavLink>}
           {(!isAuthenticated || user?.rol !== 'admin') && (
-            <NavLink to="/carrito">Carrito ({totalItems})</NavLink>
+            <NavLink to="/carrito" className="cart-link">
+              Carrito
+              {totalItems > 0 && <span className="cart-badge">{totalItems}</span>}
+            </NavLink>
           )}
           {isAuthenticated && <NavLink to="/mi-panel">Mi panel</NavLink>}
           {isAuthenticated && (
