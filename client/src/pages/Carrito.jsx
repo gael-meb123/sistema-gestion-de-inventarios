@@ -4,43 +4,26 @@ import { useCart } from '../context/CartContext.jsx'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function Carrito() {
-  const {
-    items,
-    changeQuantity,
-    removeFromCart,
-    clearCart,
-    subtotal,
-    cartLoading,
-    cartError,
-  } = useCart()
-
-  const onRestar = async (id, cantidad) => {
-    await changeQuantity(id, cantidad - 1)
-  }
-
-  const onSumar = async (id, cantidad) => {
-    await changeQuantity(id, cantidad + 1)
-  }
-
-  const onEliminar = async (id) => {
-    await removeFromCart(id)
-  }
-
-  const onVaciar = async () => {
-    await clearCart()
-  }
+  const { items, changeQuantity, removeFromCart, clearCart, subtotal, cartLoading, cartError } = useCart()
 
   return (
     <section className="panel">
-      <h2>Carrito de compras</h2>
+      <div className="page-header">
+        <h2>Carrito de compras</h2>
+        {items.length > 0 && (
+          <span className="badge">{items.length} {items.length === 1 ? 'producto' : 'productos'}</span>
+        )}
+      </div>
 
       {cartLoading && <p className="status loading">Cargando carrito...</p>}
       {cartError && <p className="status error">{cartError}</p>}
 
-      {items.length === 0 && (
-        <p>
-          Tu carrito esta vacio. Ve a <Link className="link" to="/">inicio</Link> para agregar productos.
-        </p>
+      {items.length === 0 && !cartLoading && (
+        <div className="empty-state">
+          <div className="empty-icon">🛒</div>
+          <p className="empty-title">Tu carrito está vacío</p>
+          <p className="empty-sub">Agrega productos desde el <Link className="link" to="/">inicio</Link></p>
+        </div>
       )}
 
       {items.length > 0 && (
@@ -48,12 +31,10 @@ function Carrito() {
           <ul className="carrito-lista">
             {items.map((item) => (
               <li key={item.id} className="carrito-item">
-                {item.imagenUrl && (
-                  <img
-                    src={`${API_BASE_URL}${item.imagenUrl}`}
-                    alt={item.nombre}
-                    className="producto-imagen-mini"
-                  />
+                {item.imagenUrl ? (
+                  <img src={`${API_BASE_URL}${item.imagenUrl}`} alt={item.nombre} className="producto-imagen-mini" />
+                ) : (
+                  <div className="imagen-mini-placeholder">📦</div>
                 )}
 
                 <div className="carrito-item-info">
@@ -62,23 +43,24 @@ function Carrito() {
                 </div>
 
                 <div className="carrito-controles">
-                  <button type="button" onClick={() => onRestar(item.id, item.cantidad)}>-</button>
+                  <button type="button" onClick={() => changeQuantity(item.id, item.cantidad - 1)}>−</button>
                   <span>{item.cantidad}</span>
-                  <button type="button" onClick={() => onSumar(item.id, item.cantidad)}>+</button>
+                  <button type="button" onClick={() => changeQuantity(item.id, item.cantidad + 1)}>+</button>
                 </div>
 
                 <div className="carrito-subtotal">${(item.precio * item.cantidad).toFixed(2)}</div>
 
-                <button type="button" className="danger-btn" onClick={() => onEliminar(item.id)}>
-                  Eliminar
-                </button>
+                <button type="button" className="danger-btn icon-btn" onClick={() => removeFromCart(item.id)}>✕</button>
               </li>
             ))}
           </ul>
 
           <div className="carrito-footer">
-            <strong>Total: ${subtotal.toFixed(2)}</strong>
-            <button type="button" className="danger-btn" onClick={onVaciar}>
+            <div className="carrito-total">
+              <span className="total-label">Total</span>
+              <strong className="total-amount">${subtotal.toFixed(2)}</strong>
+            </div>
+            <button type="button" className="danger-btn" onClick={clearCart}>
               Vaciar carrito
             </button>
           </div>
@@ -89,3 +71,4 @@ function Carrito() {
 }
 
 export default Carrito
+
