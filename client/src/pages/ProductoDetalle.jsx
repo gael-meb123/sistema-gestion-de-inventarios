@@ -26,43 +26,54 @@ function ProductoDetalle() {
         setLoading(false)
       }
     }
-
     cargarDetalle()
   }, [id])
 
   return (
     <section className="panel">
-      <h2>Detalle de producto</h2>
-      {loading && <p className="status loading">Cargando detalle...</p>}
+      <Link className="back-link" to="/">← Volver al catálogo</Link>
+
+      {loading && <p className="status loading">Cargando producto...</p>}
       {error && <p className="status error">{error}</p>}
 
       {!loading && !error && producto && (
-        <div>
-          {producto.imagenUrl && (
-            <img
-              src={`${API_BASE_URL}${producto.imagenUrl}`}
-              alt={producto.nombre}
-              className="producto-imagen-detalle"
-            />
-          )}
-          <h3>{producto.nombre}</h3>
-          <p>Precio: ${producto.precio}</p>
-          <p>Stock: {producto.stock}</p>
-          <p>Disponible: {producto.disponible ? 'Si' : 'No'}</p>
-          {!esAdmin && (
-            <p>
+        <div className="detalle-layout">
+          <div className="detalle-imagen-wrap">
+            {producto.imagenUrl ? (
+              <img src={`${API_BASE_URL}${producto.imagenUrl}`} alt={producto.nombre} className="producto-imagen-detalle" />
+            ) : (
+              <div className="detalle-imagen-placeholder">📦</div>
+            )}
+          </div>
+
+          <div className="detalle-info">
+            <h2>{producto.nombre}</h2>
+            <p className="detalle-precio">${producto.precio}</p>
+
+            <div className="detalle-meta">
+              <div className="detalle-meta-item">
+                <span className="meta-label">Stock</span>
+                <span className="meta-value">{producto.stock} unidades</span>
+              </div>
+              <div className="detalle-meta-item">
+                <span className="meta-label">Disponible</span>
+                <span className={`meta-badge ${producto.disponible ? 'badge-green' : 'badge-red'}`}>
+                  {producto.disponible ? 'Disponible' : 'Agotado'}
+                </span>
+              </div>
+            </div>
+
+            {!esAdmin && (
               <button
                 type="button"
+                className="btn-add-cart"
                 onClick={() => addToCart(producto)}
                 disabled={!producto.disponible}
               >
-                Agregar al carrito
+                {producto.disponible ? '🛒 Agregar al carrito' : 'Sin stock'}
               </button>
-            </p>
-          )}
-          <p>
-            <Link className="link" to="/">Regresar al listado</Link>
-          </p>
+            )}
+          </div>
         </div>
       )}
     </section>
