@@ -21,19 +21,32 @@ function UserPanel() {
         setError(err.response?.data?.mensaje || 'No se pudo cargar el panel de usuario')
       }
     }
-
     cargarPanel()
   }, [token])
 
   return (
     <section className="panel">
-      <h2>Panel de usuario</h2>
-      <p>Usuario: {user?.nombre} ({user?.email})</p>
+      <div className="panel-hero">
+        <div className="user-avatar lg">{user?.nombre?.[0]?.toUpperCase() || '?'}</div>
+        <div>
+          <h2>{user?.nombre}</h2>
+          <p className="text-muted">{user?.email}</p>
+        </div>
+      </div>
+
       {mensaje && <p className="status loading">{mensaje}</p>}
       {error && <p className="status error">{error}</p>}
-      <p>
-        Puedes navegar al listado de <Link className="link" to="/productos">productos</Link>.
-      </p>
+
+      <div className="panel-actions">
+        <Link className="action-card" to="/">
+          <span className="action-icon">🗂️</span>
+          <span>Ver catálogo</span>
+        </Link>
+        <Link className="action-card" to="/carrito">
+          <span className="action-icon">🛒</span>
+          <span>Mi carrito</span>
+        </Link>
+      </div>
     </section>
   )
 }
