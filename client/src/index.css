@@ -371,3 +371,81 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* Catalog two-column layout */
+.two-column {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.left-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.right-panel {
+  display: block;
+}
+
+.badge {
+  background: #e2e8f0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.45rem;
+  font-weight: 700;
+}
+
+.catalog-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.searchbar input[type='search'] {
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  width: 320px;
+}
+
+.category-tabs {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.category-tab {
+  background: #f1f5f9;
+  border: none;
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.45rem;
+  cursor: pointer;
+}
+
+.category-tab.active {
+  background: #fde68a;
+}
+
+.catalog-grid {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.65rem;
+}
+
+.producto-card .precio {
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+.producto-card .stock {
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+@media (max-width: 900px) {
+  .two-column { grid-template-columns: 1fr; }
+  .searchbar input[type='search'] { width: 100%; }
+}
