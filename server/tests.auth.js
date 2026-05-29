@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../app');
-const sequelize = require('../config/db');
-const Usuario = require('../models/Usuario');
+const app = require('./app');
+const sequelize = require('./config/db');
+const Usuario = require('./models/Usuario');
 const bcrypt = require('bcryptjs');
 
 // Setup: sincronizar BD antes de ejecutar tests
@@ -9,9 +9,8 @@ beforeAll(async () => {
   await sequelize.sync({ force: true });
 });
 
-// Cleanup: limpiar después de los tests
-afterAll(async () => {
-  await sequelize.close();
+beforeEach(async () => {
+  await sequelize.sync({ force: true });
 });
 
 describe('Auth API - POST /api/auth/register', () => {

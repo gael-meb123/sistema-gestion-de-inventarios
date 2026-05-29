@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '.env.test' });
 
-const sequelize = require('../config/db');
+const sequelize = require('./config/db');
 
 // Sincronizar base de datos antes de ejecutar pruebas
 beforeAll(async () => {

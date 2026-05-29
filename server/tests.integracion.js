@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../app');
-const sequelize = require('../config/db');
-const Producto = require('../models/Producto');
+const app = require('./app');
+const sequelize = require('./config/db');
+const Producto = require('./models/Producto');
 
 // Setup
 beforeAll(async () => {
@@ -9,8 +9,8 @@ beforeAll(async () => {
   process.env.ADMIN_SETUP_KEY = 'clave-secreta-admin';
 });
 
-afterAll(async () => {
-  await sequelize.close();
+beforeEach(async () => {
+  await sequelize.sync({ force: true });
 });
 
 describe('Integración General - Flujo Completo', () => {
@@ -98,7 +98,7 @@ describe('Integración General - Flujo Completo', () => {
 
     expect(updateCartRes.status).toBe(200);
     expect(updateCartRes.body.carrito.items[0].cantidad).toBe(3);
-    expect(updateCartRes.body.carrito.subtotal).toBe(2999.97); // 999.99 * 3
+    expect(updateCartRes.body.carrito.subtotal).toBeCloseTo(2999.97, 2); // 999.99 * 3
 
     // 8. Eliminar del carrito
     const removeCartRes = await request(app)

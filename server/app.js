@@ -24,15 +24,21 @@ const PORT = process.env.PORT || 4000;
 
 inicializarAsociaciones();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
   origin: function (origin, callback) {
-    const allowed = ['http://localhost:5173', 'http://localhost:5174'];
     if (!origin) return callback(null, true);
-    if (allowed.indexOf(origin) !== -1) return callback(null, true);
-    return callback(new Error('CORS policy: Origin not allowed'));
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error(`CORS policy: Origin not allowed: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
 }));
 
 app.use(adjuntarUsuarioOpcional);

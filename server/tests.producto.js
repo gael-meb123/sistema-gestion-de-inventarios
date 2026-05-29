@@ -1,16 +1,16 @@
 const request = require('supertest');
-const app = require('../app');
-const sequelize = require('../config/db');
-const Usuario = require('../models/Usuario');
-const Producto = require('../models/Producto');
+const app = require('./app');
+const sequelize = require('./config/db');
+const Usuario = require('./models/Usuario');
+const Producto = require('./models/Producto');
 
 // Setup
 beforeAll(async () => {
   await sequelize.sync({ force: true });
 });
 
-afterAll(async () => {
-  await sequelize.close();
+beforeEach(async () => {
+  await sequelize.sync({ force: true });
 });
 
 describe('Producto API - GET /api/productos', () => {
@@ -117,13 +117,12 @@ describe('Producto API - POST /api/productos (Admin only)', () => {
   
   let adminToken;
 
-  beforeEach(async () => {
-    // Crear usuario admin
+  beforeAll(async () => {
     const adminRes = await request(app)
       .post('/api/auth/register')
       .send({
         nombre: 'Admin',
-        email: 'admin@example.com',
+        email: `admin${Date.now()}@example.com`,
         password: 'password123',
         rol: 'admin',
         adminSetupKey: process.env.ADMIN_SETUP_KEY
@@ -179,6 +178,19 @@ describe('Producto API - POST /api/productos (Admin only)', () => {
       });
 
     expect(response.status).toBe(403);
+  });
+
+  beforeAll(async () => {
+    const adminRes = await request(app)
+      .post('/api/auth/register')
+      .send({
+        nombre: 'Admin',
+        email: `admin${Date.now()}@example.com`,
+        password: 'password123',
+        rol: 'admin',
+        adminSetupKey: process.env.ADMIN_SETUP_KEY
+      });
+    adminToken = adminRes.body.token;
   });
 
   it('Debe validar campos requeridos', async () => {

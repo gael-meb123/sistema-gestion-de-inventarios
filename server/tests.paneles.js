@@ -1,7 +1,7 @@
 const request = require('supertest');
-const app = require('../app');
-const sequelize = require('../config/db');
-const Usuario = require('../models/Usuario');
+const app = require('./app');
+const sequelize = require('./config/db');
+const Usuario = require('./models/Usuario');
 
 // Setup
 beforeAll(async () => {
@@ -9,8 +9,8 @@ beforeAll(async () => {
   process.env.ADMIN_SETUP_KEY = 'clave-secreta-admin';
 });
 
-afterAll(async () => {
-  await sequelize.close();
+beforeEach(async () => {
+  await sequelize.sync({ force: true });
 });
 
 describe('Panel API - Roles y Autorización', () => {

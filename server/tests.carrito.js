@@ -1,17 +1,17 @@
 const request = require('supertest');
-const app = require('../app');
-const sequelize = require('../config/db');
-const Usuario = require('../models/Usuario');
-const Producto = require('../models/Producto');
-const Carrito = require('../models/Carrito');
+const app = require('./app');
+const sequelize = require('./config/db');
+const Usuario = require('./models/Usuario');
+const Producto = require('./models/Producto');
+const Carrito = require('./models/Carrito');
 
 // Setup
 beforeAll(async () => {
   await sequelize.sync({ force: true });
 });
 
-afterAll(async () => {
-  await sequelize.close();
+beforeEach(async () => {
+  await sequelize.sync({ force: true });
 });
 
 describe('Carrito API - GET /api/carrito', () => {
