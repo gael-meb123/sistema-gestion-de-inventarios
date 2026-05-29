@@ -6,6 +6,11 @@ require('dotenv').config({ path: envFile });
 const isTest = process.env.NODE_ENV === 'test';
 const databaseUrl = process.env.DATABASE_URL;
 
+if (!isTest && !databaseUrl) {
+  console.error('❌ ERROR: DATABASE_URL no está configurada en variables de entorno');
+  process.exit(1);
+}
+
 const sequelize = isTest
   ? new Sequelize({
       dialect: 'sqlite',
