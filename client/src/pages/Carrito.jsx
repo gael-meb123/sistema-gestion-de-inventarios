@@ -7,7 +7,7 @@ function Carrito() {
   const { items, changeQuantity, removeFromCart, clearCart, subtotal, cartLoading, cartError } = useCart()
 
   return (
-    <section className="panel">
+    <section className="panel panel-page page-shell">
       <div className="page-header">
         <h2>Carrito de compras</h2>
         {items.length > 0 && (
@@ -45,7 +45,14 @@ function Carrito() {
                 <div className="carrito-controles">
                   <button type="button" onClick={() => changeQuantity(item.id, item.cantidad - 1)}>−</button>
                   <span>{item.cantidad}</span>
-                  <button type="button" onClick={() => changeQuantity(item.id, item.cantidad + 1)}>+</button>
+                  <button
+                    type="button"
+                    onClick={() => changeQuantity(item.id, item.cantidad + 1)}
+                    disabled={(item.stock ?? 0) <= 0}
+                    title={(item.stock ?? 0) <= 0 ? 'Sin stock disponible' : undefined}
+                  >
+                    +
+                  </button>
                 </div>
 
                 <div className="carrito-subtotal">${(item.precio * item.cantidad).toFixed(2)}</div>

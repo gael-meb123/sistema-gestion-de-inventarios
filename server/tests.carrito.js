@@ -117,6 +117,43 @@ describe('Carrito API - POST /api/carrito/items', () => {
     expect(response.body.carrito.totalItems).toBe(2);
   });
 
+  it('Debe descontar stock al agregar al carrito', async () => {
+    const response = await request(app)
+      .post('/api/carrito/items')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productoId: productoId,
+        cantidad: 3,
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.carrito.items[0].stock).toBe(17);
+    expect(response.body.productosActualizados[0].stock).toBe(17);
+
+    const producto = await Producto.findByPk(productoId);
+    expect(producto.stock).toBe(17);
+  });
+
+  it('Debe restaurar stock al eliminar del carrito', async () => {
+    await request(app)
+      .post('/api/carrito/items')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        productoId: productoId,
+        cantidad: 4,
+      });
+
+    const response = await request(app)
+      .delete(`/api/carrito/items/${productoId}`)
+      .set('Authorization', `Bearer ${userToken}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body.productosActualizados[0].stock).toBe(20);
+
+    const producto = await Producto.findByPk(productoId);
+    expect(producto.stock).toBe(20);
+  });
+
   it('Debe incrementar cantidad si el producto ya está en carrito', async () => {
     // Agregar primera vez
     await request(app)

@@ -80,15 +80,19 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const authHeaders = useMemo(() => buildAuthHeaders(token), [token])
+
   const value = useMemo(() => ({
     token,
     user,
     authLoading,
     isAuthenticated: Boolean(token && user),
+    isAdmin: user?.rol === 'admin',
+    authHeaders,
     login,
     register,
     logout,
-  }), [token, user, authLoading])
+  }), [token, user, authLoading, authHeaders])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

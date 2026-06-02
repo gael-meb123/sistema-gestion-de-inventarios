@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const Usuario = require('../models/Usuario');
 
 function extraerToken(authorization) {
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -34,11 +35,33 @@ const adjuntarUsuarioOpcional = (req, _res, next) => {
   next();
 };
 
-const autenticarToken = (req, res, next) => {
-  if (!req.usuario) {
+const autenticarToken = async (req, res, next) => {
+  if (!req.usuario?.id) {
     return res.status(401).json({ mensaje: 'Token no proporcionado o invalido' });
   }
-  next();
+
+  try {
+    const usuario = await Usuario.findByPk(req.usuario.id, {
+      attributes: ['id', 'email', 'rol'],
+    });
+
+    if (!usuario) {
+      return res.status(401).json({ mensaje: 'Usuario no encontrado o sesion invalida' });
+    }
+
+    req.usuario = {
+      id: usuario.id,
+      email: usuario.email,
+      rol: usuario.rol,
+    };
+
+    return next();
+  } catch (error) {
+    return res.status(500).json({
+      mensaje: 'Error al validar la sesion',
+      error: error.message,
+    });
+  }
 };
 
 const autorizarRoles = (...rolesPermitidos) => (req, res, next) => {
@@ -47,10 +70,15 @@ const autorizarRoles = (...rolesPermitidos) => (req, res, next) => {
   }
 
   if (!rolesPermitidos.includes(req.usuario.rol)) {
-    return res.status(403).json({ mensaje: 'No tienes permisos para esta accion' });
+    const requiereAdmin = rolesPermitidos.length === 1 && rolesPermitidos[0] === 'admin';
+    return res.status(403).json({
+      mensaje: requiereAdmin
+        ? 'Se requiere una cuenta de administrador para esta accion'
+        : 'No tienes permisos para esta accion',
+    });
   }
 
-  next();
+  return next();
 };
 
 module.exports = {

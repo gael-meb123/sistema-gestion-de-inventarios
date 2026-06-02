@@ -9,7 +9,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 export default function ProductGrid() {
-  const { addToCart } = useCart()
+  const { addToCart, aplicarStockAProducto } = useCart()
   const { user } = useAuth()
   const esAdmin = user?.rol === 'admin'
 
@@ -67,9 +67,13 @@ export default function ProductGrid() {
 
       {!loading && !error && filtered.length > 0 && (
         <ul className="productos-grid catalog-grid">
-          {filtered.map(producto => (
+          {filtered.map((producto) => (
             <li key={producto.id}>
-              <ProductCard producto={producto} esAdmin={esAdmin} onAddToCart={addToCart} />
+              <ProductCard
+                producto={aplicarStockAProducto(producto)}
+                esAdmin={esAdmin}
+                onAddToCart={addToCart}
+              />
             </li>
           ))}
         </ul>

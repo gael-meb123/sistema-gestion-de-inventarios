@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { crearProductoSchema } from '../validations/formSchemas.js'
 import { issuesToFieldErrors } from '../validations/zodHelpers.js'
@@ -8,8 +8,7 @@ import { issuesToFieldErrors } from '../validations/zodHelpers.js'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function NuevaPieza() {
-  const { token } = useAuth()
-  const navigate = useNavigate()
+  const { authLoading, isAdmin, authHeaders } = useAuth()
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
   const [guardando, setGuardando] = useState(false)
@@ -25,6 +24,18 @@ function NuevaPieza() {
     const file = event.target.files?.[0] || null
     setFieldErrors((prev) => ({ ...prev, imagen: undefined }))
     setForm((prev) => ({ ...prev, imagen: file }))
+  }
+
+  if (authLoading) {
+    return (
+      <section className="panel panel-page page-shell">
+        <p className="status loading">Validando sesion...</p>
+      </section>
+    )
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/mi-panel" replace />
   }
 
   const onSubmit = async (event) => {
@@ -48,26 +59,38 @@ function NuevaPieza() {
       if (parsed.data.imagen) formData.append('imagen', parsed.data.imagen)
 
       const { data } = await axios.post(`${API_BASE_URL}/api/productos`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: authHeaders,
       })
 
       setMensaje(`✓ Pieza creada: ${data.producto.nombre}`)
       setForm({ nombre: '', precio: '', stock: '', imagen: null })
     } catch (err) {
-      setError(err.response?.data?.mensaje || 'No se pudo crear la pieza')
+      const status = err.response?.status
+      const mensajeApi = err.response?.data?.mensaje
+      if (status === 403) {
+        setError(
+          mensajeApi
+            || 'Tu cuenta no tiene permisos de administrador. Registrate como admin con la clave correcta o vuelve a iniciar sesion.',
+        )
+      } else if (status === 401) {
+        setError('Tu sesion expiro. Vuelve a iniciar sesion.')
+      } else {
+        setError(mensajeApi || 'No se pudo crear la pieza')
+      }
     } finally {
       setGuardando(false)
     }
   }
 
   return (
-    <section className="panel">
-      <div className="admin-header">
+    <section className="panel panel-page page-shell">
+      <div className="panel-toolbar">
+        <div>
+          <h2>Nueva pieza</h2>
+          <p className="text-muted">Agrega un nuevo producto al inventario</p>
+        </div>
         <Link className="secondary-link-btn" to="/mi-panel">← Volver al panel</Link>
       </div>
-
-      <h2>Nueva pieza</h2>
-      <p className="text-muted">Agrega un nuevo producto al inventario</p>
 
       {mensaje && <p className="status loading">{mensaje}</p>}
       {error && <p className="status error">{error}</p>}

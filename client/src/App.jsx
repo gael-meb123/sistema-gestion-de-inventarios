@@ -24,8 +24,8 @@ function App() {
         </NavLink>
         <nav>
           <NavLink to="/" end>Inicio</NavLink>
-          {!isAuthenticated && <NavLink to="/login">Login</NavLink>}
-          {!isAuthenticated && <NavLink to="/registro">Registro</NavLink>}
+          {!isAuthenticated && <NavLink to="/login">Iniciar sesión</NavLink>}
+          {!isAuthenticated && <NavLink to="/registro">Crear cuenta</NavLink>}
           {(!isAuthenticated || user?.rol !== 'admin') && (
             <NavLink to="/carrito" className="cart-link">
               Carrito

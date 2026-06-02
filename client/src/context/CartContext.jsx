@@ -15,12 +15,28 @@ function leerCarritoInicial() {
   }
 }
 
+function fusionarProductosStock(prev, productosActualizados = []) {
+  if (!productosActualizados.length) {
+    return prev
+  }
+
+  const next = { ...prev }
+  for (const item of productosActualizados) {
+    next[item.productoId] = {
+      stock: item.stock,
+      disponible: item.disponible,
+    }
+  }
+  return next
+}
+
 export function CartProvider({ children }) {
   const { token, user, isAuthenticated, authLoading } = useAuth()
   const esAdmin = user?.rol === 'admin'
   const [items, setItems] = useState(leerCarritoInicial)
   const [cartLoading, setCartLoading] = useState(false)
   const [cartError, setCartError] = useState('')
+  const [productosStock, setProductosStock] = useState({})
 
   const headers = useMemo(() => (
     token ? { Authorization: `Bearer ${token}` } : {}
@@ -36,8 +52,19 @@ export function CartProvider({ children }) {
     disponible: Boolean(item.disponible),
   }))
 
-  const setDesdeCarritoApi = (carrito) => {
+  const setDesdeCarritoApi = (carrito, productosActualizados) => {
     setItems(normalizarItemsApi(carrito?.items || []))
+    if (productosActualizados?.length) {
+      setProductosStock((prev) => fusionarProductosStock(prev, productosActualizados))
+    }
+  }
+
+  const aplicarStockAProducto = (producto) => {
+    const actualizado = productosStock[producto.id]
+    if (!actualizado) {
+      return producto
+    }
+    return { ...producto, ...actualizado }
   }
 
   const persistir = (nextItems) => {
@@ -92,7 +119,7 @@ export function CartProvider({ children }) {
           productoId: producto.id,
           cantidad: 1,
         }, { headers })
-        setDesdeCarritoApi(data.carrito)
+        setDesdeCarritoApi(data.carrito, data.productosActualizados)
         return true
       } catch (error) {
         setCartError(error.response?.data?.mensaje || 'No se pudo agregar al carrito')
@@ -100,13 +127,27 @@ export function CartProvider({ children }) {
       }
     }
 
+    const stockDisponible = productosStock[producto.id]?.stock ?? producto.stock ?? 0
     const existente = items.find((item) => item.id === producto.id)
+    const cantidadActual = existente?.cantidad ?? 0
+
+    if (cantidadActual + 1 > stockDisponible) {
+      setCartError(`Stock insuficiente. Disponible: ${stockDisponible}`)
+      return false
+    }
 
     if (existente) {
       const next = items.map((item) => (
         item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
       ))
       persistir(next)
+      setProductosStock((prev) => ({
+        ...prev,
+        [producto.id]: {
+          stock: stockDisponible - 1,
+          disponible: stockDisponible - 1 > 0,
+        },
+      }))
       return true
     }
 
@@ -118,8 +159,17 @@ export function CartProvider({ children }) {
         precio: Number(producto.precio) || 0,
         imagenUrl: producto.imagenUrl || null,
         cantidad: 1,
+        stock: stockDisponible - 1,
+        disponible: stockDisponible - 1 > 0,
       },
     ])
+    setProductosStock((prev) => ({
+      ...prev,
+      [producto.id]: {
+        stock: stockDisponible - 1,
+        disponible: stockDisponible - 1 > 0,
+      },
+    }))
     return true
   }
 
@@ -133,12 +183,24 @@ export function CartProvider({ children }) {
     if (isAuthenticated) {
       try {
         const { data } = await axios.delete(`${API_BASE_URL}/api/carrito/items/${id}`, { headers })
-        setDesdeCarritoApi(data.carrito)
+        setDesdeCarritoApi(data.carrito, data.productosActualizados)
         return true
       } catch (error) {
         setCartError(error.response?.data?.mensaje || 'No se pudo eliminar el producto del carrito')
         return false
       }
+    }
+
+    const itemEliminado = items.find((item) => item.id === id)
+    if (itemEliminado) {
+      const stockCatalogo = productosStock[id]?.stock ?? itemEliminado.stock ?? 0
+      setProductosStock((prev) => ({
+        ...prev,
+        [id]: {
+          stock: stockCatalogo + itemEliminado.cantidad,
+          disponible: stockCatalogo + itemEliminado.cantidad > 0,
+        },
+      }))
     }
 
     persistir(items.filter((item) => item.id !== id))
@@ -161,7 +223,7 @@ export function CartProvider({ children }) {
         const { data } = await axios.patch(`${API_BASE_URL}/api/carrito/items/${id}`, {
           cantidad: nextCantidad,
         }, { headers })
-        setDesdeCarritoApi(data.carrito)
+        setDesdeCarritoApi(data.carrito, data.productosActualizados)
         return true
       } catch (error) {
         setCartError(error.response?.data?.mensaje || 'No se pudo actualizar la cantidad')
@@ -169,10 +231,38 @@ export function CartProvider({ children }) {
       }
     }
 
+    const itemActual = items.find((item) => item.id === id)
+    if (!itemActual) {
+      return false
+    }
+
+    const stockCatalogo = productosStock[id]?.stock ?? itemActual.stock ?? 0
+    const stockTotal = stockCatalogo + itemActual.cantidad
+
+    if (nextCantidad > stockTotal) {
+      setCartError(`Stock insuficiente. Disponible: ${stockTotal}`)
+      return false
+    }
+
+    const delta = nextCantidad - itemActual.cantidad
     const next = items.map((item) => (
-      item.id === id ? { ...item, cantidad: nextCantidad } : item
+      item.id === id
+        ? {
+          ...item,
+          cantidad: nextCantidad,
+          stock: Math.max(0, (item.stock ?? stockCatalogo) - delta),
+          disponible: Math.max(0, (item.stock ?? stockCatalogo) - delta) > 0,
+        }
+        : item
     ))
     persistir(next)
+    setProductosStock((prev) => ({
+      ...prev,
+      [id]: {
+        stock: Math.max(0, stockCatalogo - delta),
+        disponible: Math.max(0, stockCatalogo - delta) > 0,
+      },
+    }))
     return true
   }
 
@@ -186,12 +276,24 @@ export function CartProvider({ children }) {
     if (isAuthenticated) {
       try {
         const { data } = await axios.delete(`${API_BASE_URL}/api/carrito`, { headers })
-        setDesdeCarritoApi(data.carrito)
+        setDesdeCarritoApi(data.carrito, data.productosActualizados)
         return true
       } catch (error) {
         setCartError(error.response?.data?.mensaje || 'No se pudo vaciar el carrito')
         return false
       }
+    }
+
+    const restauraciones = {}
+    for (const item of items) {
+      const stockCatalogo = productosStock[item.id]?.stock ?? item.stock ?? 0
+      restauraciones[item.id] = {
+        stock: stockCatalogo + item.cantidad,
+        disponible: stockCatalogo + item.cantidad > 0,
+      }
+    }
+    if (Object.keys(restauraciones).length > 0) {
+      setProductosStock((prev) => ({ ...prev, ...restauraciones }))
     }
 
     persistir([])
@@ -212,9 +314,11 @@ export function CartProvider({ children }) {
     clearCart,
     cartLoading,
     cartError,
+    productosStock,
+    aplicarStockAProducto,
     totalItems: totals.totalItems,
     subtotal: totals.subtotal,
-  }), [items, totals, cartLoading, cartError])
+  }), [items, totals, cartLoading, cartError, productosStock])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function UserPanel() {
-  const { token, user } = useAuth()
+  const { user, authHeaders } = useAuth()
   const [mensaje, setMensaje] = useState('')
   const [error, setError] = useState('')
 
@@ -14,7 +14,7 @@ function UserPanel() {
     const cargarPanel = async () => {
       try {
         const { data } = await axios.get(`${API_BASE_URL}/api/panel/usuario`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: authHeaders,
         })
         setMensaje(data.mensaje)
       } catch (err) {
@@ -22,10 +22,10 @@ function UserPanel() {
       }
     }
     cargarPanel()
-  }, [token])
+  }, [authHeaders])
 
   return (
-    <section className="panel">
+    <section className="panel panel-page page-shell">
       <div className="panel-hero">
         <div className="user-avatar lg">{user?.nombre?.[0]?.toUpperCase() || '?'}</div>
         <div>
@@ -37,15 +37,17 @@ function UserPanel() {
       {mensaje && <p className="status loading">{mensaje}</p>}
       {error && <p className="status error">{error}</p>}
 
-      <div className="panel-actions">
-        <Link className="action-card" to="/">
-          <span className="action-icon">🗂️</span>
-          <span>Ver catálogo</span>
-        </Link>
-        <Link className="action-card" to="/carrito">
-          <span className="action-icon">🛒</span>
-          <span>Mi carrito</span>
-        </Link>
+      <div className="panel-section">
+        <div className="panel-actions">
+          <Link className="action-card" to="/">
+            <span className="action-icon">🗂️</span>
+            <span>Ver catálogo</span>
+          </Link>
+          <Link className="action-card" to="/carrito">
+            <span className="action-icon">🛒</span>
+            <span>Mi carrito</span>
+          </Link>
+        </div>
       </div>
     </section>
   )

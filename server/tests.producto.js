@@ -117,7 +117,7 @@ describe('Producto API - POST /api/productos (Admin only)', () => {
   
   let adminToken;
 
-  beforeAll(async () => {
+  beforeEach(async () => {
     const adminRes = await request(app)
       .post('/api/auth/register')
       .send({
@@ -163,7 +163,7 @@ describe('Producto API - POST /api/productos (Admin only)', () => {
       .post('/api/auth/register')
       .send({
         nombre: 'User',
-        email: 'user@example.com',
+        email: `user${Date.now()}@example.com`,
         password: 'password123'
       });
     const userToken = userRes.body.token;
@@ -178,19 +178,6 @@ describe('Producto API - POST /api/productos (Admin only)', () => {
       });
 
     expect(response.status).toBe(403);
-  });
-
-  beforeAll(async () => {
-    const adminRes = await request(app)
-      .post('/api/auth/register')
-      .send({
-        nombre: 'Admin',
-        email: `admin${Date.now()}@example.com`,
-        password: 'password123',
-        rol: 'admin',
-        adminSetupKey: process.env.ADMIN_SETUP_KEY
-      });
-    adminToken = adminRes.body.token;
   });
 
   it('Debe validar campos requeridos', async () => {
