@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 
 function MiniCarritoSidebar() {
+  const { isAuthenticated } = useAuth()
   const { items, subtotal } = useCart()
 
   return (
@@ -30,6 +31,17 @@ function MiniCarritoSidebar() {
             <strong>${subtotal.toFixed(2)}</strong>
           </div>
           <Link className="btn-primary-sm block-btn" to="/carrito">Ver carrito</Link>
+          {isAuthenticated ? (
+            <Link className="btn-primary-sm block-btn checkout-sidebar-btn" to="/checkout">Pagar</Link>
+          ) : (
+            <Link
+              className="btn-primary-sm block-btn checkout-sidebar-btn"
+              to="/login"
+              state={{ from: { pathname: '/checkout' } }}
+            >
+              Pagar
+            </Link>
+          )}
         </>
       )}
     </div>
@@ -45,6 +57,7 @@ function SidebarUsuario({ user, esAdmin }) {
           <div>
             <p className="user-name">{user.nombre}</p>
             <Link className="link" to="/mi-panel">Ver mi panel →</Link>
+            <Link className="link" to="/mi-panel/perfil">Mi cuenta →</Link>
           </div>
         </div>
       </div>

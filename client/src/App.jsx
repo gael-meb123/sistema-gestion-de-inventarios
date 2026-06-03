@@ -8,7 +8,9 @@ import NotFound from './pages/NotFound.jsx'
 import Login from './pages/Login.jsx'
 import Registro from './pages/Registro.jsx'
 import MiPanel from './pages/MiPanel.jsx'
+import PerfilCuenta from './pages/PerfilCuenta.jsx'
 import Carrito from './pages/Carrito.jsx'
+import Checkout from './pages/Checkout.jsx'
 import NuevaPieza from './pages/NuevaPieza.jsx'
 
 function App() {
@@ -50,6 +52,14 @@ function App() {
             path="/carrito"
             element={isAuthenticated && user?.rol === 'admin' ? <Navigate to="/mi-panel" replace /> : <Carrito />}
           />
+          <Route
+            path="/checkout"
+            element={(
+              <ProtectedRoute roles={['user']}>
+                <Checkout />
+              </ProtectedRoute>
+            )}
+          />
           <Route path="/productos" element={<Navigate to="/" replace />} />
           <Route path="/producto/:id" element={<ProductoDetalle />} />
           <Route
@@ -57,6 +67,14 @@ function App() {
             element={(
               <ProtectedRoute roles={['admin', 'user']}>
                 <MiPanel />
+              </ProtectedRoute>
+            )}
+          />
+          <Route
+            path="/mi-panel/perfil"
+            element={(
+              <ProtectedRoute roles={['admin', 'user']}>
+                <PerfilCuenta />
               </ProtectedRoute>
             )}
           />

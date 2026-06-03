@@ -3,11 +3,13 @@ import axios from 'axios'
 import { Link, useParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useAddToCartWithAuth } from '../hooks/useAddToCartWithAuth.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function ProductoDetalle() {
-  const { addToCart, aplicarStockAProducto, productosStock } = useCart()
+  const { aplicarStockAProducto, productosStock } = useCart()
+  const addToCart = useAddToCartWithAuth()
   const { user } = useAuth()
   const esAdmin = user?.rol === 'admin'
   const { id } = useParams()

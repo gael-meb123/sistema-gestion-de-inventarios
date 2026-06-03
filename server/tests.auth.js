@@ -225,3 +225,107 @@ describe('Auth API - GET /api/auth/me', () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe('Auth API - PATCH /api/auth/perfil', () => {
+  let validToken;
+
+  beforeEach(async () => {
+    const registerRes = await request(app)
+      .post('/api/auth/register')
+      .send({
+        nombre: 'Perfil User',
+        email: `perfil${Date.now()}@example.com`,
+        password: 'password123',
+      });
+
+    validToken = registerRes.body.token;
+  });
+
+  it('Debe actualizar el nombre sin contraseña actual', async () => {
+    const response = await request(app)
+      .patch('/api/auth/perfil')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({ nombre: 'Nombre Actualizado' });
+
+    expect(response.status).toBe(200);
+    expect(response.body.usuario.nombre).toBe('Nombre Actualizado');
+  });
+
+  it('Debe actualizar email con contraseña actual y devolver nuevo token', async () => {
+    const nuevoEmail = `nuevo${Date.now()}@example.com`;
+
+    const response = await request(app)
+      .patch('/api/auth/perfil')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({
+        email: nuevoEmail,
+        passwordActual: 'password123',
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.usuario.email).toBe(nuevoEmail);
+    expect(response.body).toHaveProperty('token');
+  });
+
+  it('Debe actualizar contraseña con contraseña actual', async () => {
+    const response = await request(app)
+      .patch('/api/auth/perfil')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({
+        passwordActual: 'password123',
+        passwordNueva: 'nuevaClave123',
+      });
+
+    expect(response.status).toBe(200);
+
+    const loginVieja = await request(app)
+      .post('/api/auth/login')
+      .send({ email: response.body.usuario.email, password: 'password123' });
+    expect(loginVieja.status).toBe(401);
+
+    const loginNueva = await request(app)
+      .post('/api/auth/login')
+      .send({ email: response.body.usuario.email, password: 'nuevaClave123' });
+    expect(loginNueva.status).toBe(200);
+  });
+
+  it('Debe rechazar email duplicado', async () => {
+    await request(app)
+      .post('/api/auth/register')
+      .send({
+        nombre: 'Otro User',
+        email: 'duplicado@example.com',
+        password: 'password123',
+      });
+
+    const registro = await request(app)
+      .post('/api/auth/register')
+      .send({
+        nombre: 'Perfil Dos',
+        email: `perfil2${Date.now()}@example.com`,
+        password: 'password123',
+      });
+
+    const response = await request(app)
+      .patch('/api/auth/perfil')
+      .set('Authorization', `Bearer ${registro.body.token}`)
+      .send({
+        email: 'duplicado@example.com',
+        passwordActual: 'password123',
+      });
+
+    expect(response.status).toBe(409);
+  });
+
+  it('Debe rechazar contraseña actual incorrecta', async () => {
+    const response = await request(app)
+      .patch('/api/auth/perfil')
+      .set('Authorization', `Bearer ${validToken}`)
+      .send({
+        passwordActual: 'malpassword',
+        passwordNueva: 'nuevaClave123',
+      });
+
+    expect(response.status).toBe(401);
+  });
+});

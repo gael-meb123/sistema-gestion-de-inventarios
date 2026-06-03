@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext.jsx'
 import { useCart } from '../context/CartContext.jsx'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 function Carrito() {
+  const { isAuthenticated } = useAuth()
   const { items, changeQuantity, removeFromCart, clearCart, subtotal, cartLoading, cartError } = useCart()
 
   return (
@@ -67,9 +69,22 @@ function Carrito() {
               <span className="total-label">Total</span>
               <strong className="total-amount">${subtotal.toFixed(2)}</strong>
             </div>
-            <button type="button" className="danger-btn" onClick={clearCart}>
-              Vaciar carrito
-            </button>
+            <div className="carrito-footer-actions">
+              {isAuthenticated ? (
+                <Link className="btn-primary" to="/checkout">Pagar</Link>
+              ) : (
+                <Link
+                  className="btn-primary"
+                  to="/login"
+                  state={{ from: { pathname: '/checkout' } }}
+                >
+                  Pagar
+                </Link>
+              )}
+              <button type="button" className="danger-btn" onClick={clearCart}>
+                Vaciar carrito
+              </button>
+            </div>
           </div>
         </>
       )}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
@@ -80,6 +80,32 @@ export function AuthProvider({ children }) {
     setUser(null)
   }
 
+  const updateProfile = useCallback(async (payload) => {
+    const { data } = await axios.patch(`${API_BASE_URL}/api/auth/perfil`, payload, {
+      headers: buildAuthHeaders(token),
+    })
+
+    if (data.token) {
+      localStorage.setItem(TOKEN_KEY, data.token)
+      setToken(data.token)
+    }
+
+    setUser(data.usuario)
+    return data
+  }, [token])
+
+  const refreshUser = useCallback(async () => {
+    if (!token) {
+      return null
+    }
+
+    const { data } = await axios.get(`${API_BASE_URL}/api/auth/me`, {
+      headers: buildAuthHeaders(token),
+    })
+    setUser(data.usuario)
+    return data.usuario
+  }, [token])
+
   const authHeaders = useMemo(() => buildAuthHeaders(token), [token])
 
   const value = useMemo(() => ({
@@ -92,7 +118,9 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
-  }), [token, user, authLoading, authHeaders])
+    updateProfile,
+    refreshUser,
+  }), [token, user, authLoading, authHeaders, updateProfile, refreshUser])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

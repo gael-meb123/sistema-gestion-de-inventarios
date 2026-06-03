@@ -10,6 +10,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const { inicializarAsociaciones } = require('./models/asociaciones');
 const authController = require('./controllers/authController');
 const carritoController = require('./controllers/carritoController');
+const compraController = require('./controllers/compraController');
 const productoController = require('./controllers/productoController');
 const { validarRegistroProducto } = require('./middlewares/validadorProducto');
 const { uploadProductoImagen } = require('./middlewares/uploadProductoImagen');
@@ -27,8 +28,13 @@ inicializarAsociaciones();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'https://sistema-gestion-inventarios.online',
+  'http://sistema-gestion-inventarios.online',
   process.env.FRONTEND_URL,
 ].filter(Boolean);
+
+const corsAllowedMethods = ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'];
+const corsAllowedHeaders = ['Content-Type', 'Authorization'];
 
 const isAllowedOrigin = (origin) => {
   if (!origin) return true;
@@ -37,15 +43,19 @@ const isAllowedOrigin = (origin) => {
   return false;
 };
 
-app.use(cors({
-  origin: function (origin, callback) {
+const corsOptions = {
+  origin(origin, callback) {
     if (isAllowedOrigin(origin)) return callback(null, true);
     return callback(new Error(`CORS policy: Origin not allowed: ${origin}`));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: corsAllowedMethods,
+  allowedHeaders: corsAllowedHeaders,
   credentials: true,
-}));
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 
 app.use(adjuntarUsuarioOpcional);
 
@@ -260,6 +270,42 @@ app.get('/api/auth/me', autenticarToken, authController.me);
 
 /**
  * @openapi
+ * /api/auth/perfil:
+ *   patch:
+ *     tags:
+ *       - Autenticación
+ *     summary: Actualiza nombre, email o contraseña del usuario autenticado
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nombre:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               passwordActual:
+ *                 type: string
+ *               passwordNueva:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Perfil actualizado
+ *       400:
+ *         description: Datos inválidos o sin cambios
+ *       401:
+ *         description: Contraseña actual incorrecta
+ *       409:
+ *         description: Email ya registrado
+ */
+app.patch('/api/auth/perfil', autenticarToken, authController.actualizarPerfil);
+
+/**
+ * @openapi
  * /api/panel/admin:
  *   get:
  *     tags:
@@ -404,6 +450,7 @@ app.post('/api/carrito/items', autenticarToken, carritoController.agregarItem);
  *         description: Item no existe en el carrito
  */
 app.patch('/api/carrito/items/:productoId', autenticarToken, carritoController.actualizarCantidad);
+app.put('/api/carrito/items/:productoId', autenticarToken, carritoController.actualizarCantidad);
 
 /**
  * @openapi
@@ -465,6 +512,49 @@ app.delete('/api/carrito/items/:productoId', autenticarToken, carritoController.
  *         description: Token inválido o ausente
  */
 app.delete('/api/carrito', autenticarToken, carritoController.vaciarCarrito);
+
+/**
+ * @openapi
+ * /api/compras/checkout:
+ *   post:
+ *     tags:
+ *       - Compras
+ *     summary: Confirma la compra simulada y vacía el carrito
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [titular, numero, expiracion, cvv]
+ *             properties:
+ *               titular:
+ *                 type: string
+ *               numero:
+ *                 type: string
+ *               expiracion:
+ *                 type: string
+ *                 example: "12/28"
+ *               cvv:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Compra confirmada
+ *       400:
+ *         description: Carrito vacío o datos inválidos
+ *       401:
+ *         description: Token inválido o ausente
+ *       403:
+ *         description: Solo usuarios cliente pueden comprar
+ */
+app.post(
+  '/api/compras/checkout',
+  autenticarToken,
+  autorizarRoles('user'),
+  compraController.confirmarCompra,
+);
 
 /**
  * @openapi

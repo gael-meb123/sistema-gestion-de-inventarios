@@ -5,11 +5,13 @@ import SearchBar from './SearchBar'
 import CategoryTabs from './CategoryTabs'
 import { useCart } from '../context/CartContext.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { useAddToCartWithAuth } from '../hooks/useAddToCartWithAuth.js'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 export default function ProductGrid() {
-  const { addToCart, aplicarStockAProducto } = useCart()
+  const { aplicarStockAProducto } = useCart()
+  const addToCart = useAddToCartWithAuth()
   const { user } = useAuth()
   const esAdmin = user?.rol === 'admin'
 

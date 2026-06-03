@@ -31,6 +31,7 @@ function UserPanel() {
         <div>
           <h2>{user?.nombre}</h2>
           <p className="text-muted">{user?.email}</p>
+          <Link className="link" to="/mi-panel/perfil">Editar mi cuenta →</Link>
         </div>
       </div>
 
@@ -46,6 +47,10 @@ function UserPanel() {
           <Link className="action-card" to="/carrito">
             <span className="action-icon">🛒</span>
             <span>Mi carrito</span>
+          </Link>
+          <Link className="action-card" to="/mi-panel/perfil">
+            <span className="action-icon">👤</span>
+            <span>Mi cuenta</span>
           </Link>
         </div>
       </div>

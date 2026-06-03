@@ -113,64 +113,22 @@ export function CartProvider({ children }) {
       return false
     }
 
-    if (isAuthenticated) {
-      try {
-        const { data } = await axios.post(`${API_BASE_URL}/api/carrito/items`, {
-          productoId: producto.id,
-          cantidad: 1,
-        }, { headers })
-        setDesdeCarritoApi(data.carrito, data.productosActualizados)
-        return true
-      } catch (error) {
-        setCartError(error.response?.data?.mensaje || 'No se pudo agregar al carrito')
-        return false
-      }
-    }
-
-    const stockDisponible = productosStock[producto.id]?.stock ?? producto.stock ?? 0
-    const existente = items.find((item) => item.id === producto.id)
-    const cantidadActual = existente?.cantidad ?? 0
-
-    if (cantidadActual + 1 > stockDisponible) {
-      setCartError(`Stock insuficiente. Disponible: ${stockDisponible}`)
+    if (!isAuthenticated) {
+      setCartError('Debes iniciar sesion para agregar productos al carrito')
       return false
     }
 
-    if (existente) {
-      const next = items.map((item) => (
-        item.id === producto.id ? { ...item, cantidad: item.cantidad + 1 } : item
-      ))
-      persistir(next)
-      setProductosStock((prev) => ({
-        ...prev,
-        [producto.id]: {
-          stock: stockDisponible - 1,
-          disponible: stockDisponible - 1 > 0,
-        },
-      }))
-      return true
-    }
-
-    persistir([
-      ...items,
-      {
-        id: producto.id,
-        nombre: producto.nombre,
-        precio: Number(producto.precio) || 0,
-        imagenUrl: producto.imagenUrl || null,
+    try {
+      const { data } = await axios.post(`${API_BASE_URL}/api/carrito/items`, {
+        productoId: producto.id,
         cantidad: 1,
-        stock: stockDisponible - 1,
-        disponible: stockDisponible - 1 > 0,
-      },
-    ])
-    setProductosStock((prev) => ({
-      ...prev,
-      [producto.id]: {
-        stock: stockDisponible - 1,
-        disponible: stockDisponible - 1 > 0,
-      },
-    }))
-    return true
+      }, { headers })
+      setDesdeCarritoApi(data.carrito, data.productosActualizados)
+      return true
+    } catch (error) {
+      setCartError(error.response?.data?.mensaje || 'No se pudo agregar al carrito')
+      return false
+    }
   }
 
   const removeFromCart = async (id) => {
@@ -220,7 +178,7 @@ export function CartProvider({ children }) {
 
     if (isAuthenticated) {
       try {
-        const { data } = await axios.patch(`${API_BASE_URL}/api/carrito/items/${id}`, {
+        const { data } = await axios.put(`${API_BASE_URL}/api/carrito/items/${id}`, {
           cantidad: nextCantidad,
         }, { headers })
         setDesdeCarritoApi(data.carrito, data.productosActualizados)
@@ -264,6 +222,36 @@ export function CartProvider({ children }) {
       },
     }))
     return true
+  }
+
+  const finalizarCompra = async (payloadTarjeta) => {
+    setCartError('')
+
+    if (esAdmin) {
+      setCartError('Los administradores no pueden realizar compras')
+      return { ok: false }
+    }
+
+    if (!isAuthenticated) {
+      setCartError('Debes iniciar sesion para pagar')
+      return { ok: false }
+    }
+
+    try {
+      const { data } = await axios.post(
+        `${API_BASE_URL}/api/compras/checkout`,
+        payloadTarjeta,
+        { headers },
+      )
+      setDesdeCarritoApi(data.carrito)
+      return { ok: true, pedido: data.pedido }
+    } catch (error) {
+      const mensaje = error.response?.data?.mensaje
+        || error.response?.data?.errores?.join(', ')
+        || 'No se pudo procesar el pago'
+      setCartError(mensaje)
+      return { ok: false }
+    }
   }
 
   const clearCart = async () => {
@@ -312,13 +300,14 @@ export function CartProvider({ children }) {
     removeFromCart,
     changeQuantity,
     clearCart,
+    finalizarCompra,
     cartLoading,
     cartError,
     productosStock,
     aplicarStockAProducto,
     totalItems: totals.totalItems,
     subtotal: totals.subtotal,
-  }), [items, totals, cartLoading, cartError, productosStock])
+  }), [items, totals, cartLoading, cartError, productosStock, headers, isAuthenticated, esAdmin])
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>
 }

@@ -184,9 +184,12 @@ function AdminPanel() {
           <h2>Panel de administrador</h2>
           <p className="text-muted">{user?.nombre} · {user?.email}</p>
         </div>
-        {isAdmin && (
-          <Link className="new-piece-btn" to="/mi-panel/nueva-pieza">+ Nueva pieza</Link>
-        )}
+        <div className="panel-toolbar-actions">
+          <Link className="secondary-btn" to="/mi-panel/perfil">Mi cuenta</Link>
+          {isAdmin && (
+            <Link className="new-piece-btn" to="/mi-panel/nueva-pieza">+ Nueva pieza</Link>
+          )}
+        </div>
       </div>
 
       <div className="panel-hero">

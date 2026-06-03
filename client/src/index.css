@@ -255,6 +255,12 @@ body {
   border: 1px solid rgba(255, 59, 48, 0.20);
 }
 
+.status.success {
+  background: rgba(52, 199, 89, 0.12);
+  color: #248a3d;
+  border: 1px solid rgba(52, 199, 89, 0.25);
+}
+
 .status.loading {
   background: var(--accent-soft);
   color: var(--accent);
@@ -623,6 +629,180 @@ body {
 .carrito-footer strong {
   font-size: 1.05rem;
   letter-spacing: -0.02em;
+}
+
+.carrito-footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.checkout-sidebar-btn {
+  margin-top: 0.35rem;
+}
+
+.checkout-page .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.checkout-simulacion-aviso {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 400px);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.checkout-resumen h3,
+.checkout-form h3 {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+}
+
+.checkout-resumen-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.checkout-resumen-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.65rem;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.checkout-resumen-item p {
+  margin: 0.15rem 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.8rem;
+}
+
+.checkout-resumen-total {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--bg-alt);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.checkout-form input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  background: var(--surface-high);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+}
+
+.checkout-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.checkout-form-row label {
+  margin-bottom: 0;
+}
+
+.checkout-actions {
+  margin-top: 0.5rem;
+}
+
+.checkout-actions .btn-primary {
+  width: 100%;
+}
+
+.checkout-success {
+  text-align: center;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.checkout-success-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-success-lead {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+.checkout-success-summary {
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border-radius: var(--r-md);
+  background: var(--bg);
+}
+
+.checkout-success-card {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin-top: 0.35rem;
+}
+
+.checkout-success-items {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  text-align: left;
+}
+
+.checkout-success-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid var(--bg-alt);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Admin Table ─────────────────────────────────────────── */
@@ -1543,6 +1723,101 @@ body {
 }
 
 .action-icon { font-size: 1.6rem; }
+
+.panel-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.perfil-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.perfil-resumen {
+  text-align: center;
+}
+
+.perfil-resumen h3 {
+  margin: 0.65rem 0 0.25rem;
+}
+
+.perfil-rol-badge {
+  display: inline-block;
+  margin-top: 0.65rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.perfil-rol-badge.admin {
+  background: rgba(255, 149, 0, 0.15);
+  color: #c93400;
+}
+
+.perfil-meta {
+  margin: 1rem 0 0;
+  padding: 0;
+  text-align: left;
+}
+
+.perfil-meta div {
+  margin-bottom: 0.65rem;
+}
+
+.perfil-meta dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-tertiary);
+  margin-bottom: 0.15rem;
+}
+
+.perfil-meta dd {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.perfil-fieldset {
+  border: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+}
+
+.perfil-fieldset legend {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.perfil-fieldset-hint {
+  margin: 0 0 0.85rem;
+  font-size: 0.82rem;
+  color: var(--text-tertiary);
+}
+
+.perfil-form-actions {
+  margin-top: 0.25rem;
+}
+
+.perfil-form-actions .btn-primary {
+  width: 100%;
+  max-width: 280px;
+}
+
+@media (max-width: 768px) {
+  .perfil-layout {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ── Form extras ─────────────────────────────────────────── */
 .label-hint {

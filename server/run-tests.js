@@ -9,6 +9,7 @@
  *   auth       - Solo pruebas de autenticación
  *   producto   - Solo pruebas de productos
  *   carrito    - Solo pruebas de carrito
+ *   compras    - Solo pruebas de compras/checkout
  *   paneles    - Solo pruebas de paneles y roles
  *   integracion- Solo pruebas de integración
  *   coverage   - Ejecutar con cobertura
@@ -26,6 +27,7 @@ const commands = {
   auth: 'npm test tests.auth.js',
   producto: 'npm test tests.producto.js',
   carrito: 'npm test tests.carrito.js',
+  compras: 'npm test tests.compras.js',
   paneles: 'npm test tests.paneles.js',
   integracion: 'npm test tests.integracion.js',
   coverage: 'npm run test:coverage',
