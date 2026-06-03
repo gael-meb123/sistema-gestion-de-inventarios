@@ -144,35 +144,41 @@ function PerfilCuenta() {
             </dl>
           </aside>
 
-          <form className="perfil-form panel form-grid" onSubmit={onSubmit}>
+          <form className="perfil-form panel" onSubmit={onSubmit}>
             <fieldset className="perfil-fieldset">
               <legend>Datos personales</legend>
               <p className="perfil-fieldset-hint">
                 Información visible en tu cuenta y en los pedidos.
               </p>
 
-              <label htmlFor="perfil-nombre">Nombre completo</label>
-              <input
-                id="perfil-nombre"
-                name="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                placeholder="Tu nombre"
-                autoComplete="name"
-              />
-              {fieldErrors.nombre && <p className="field-error">{fieldErrors.nombre}</p>}
+              <div className="perfil-fields-grid">
+                <div className="perfil-field">
+                  <label htmlFor="perfil-nombre">Nombre completo</label>
+                  <input
+                    id="perfil-nombre"
+                    name="nombre"
+                    value={nombre}
+                    onChange={(e) => setNombre(e.target.value)}
+                    placeholder="Tu nombre"
+                    autoComplete="name"
+                  />
+                  {fieldErrors.nombre && <p className="field-error">{fieldErrors.nombre}</p>}
+                </div>
 
-              <label htmlFor="perfil-email">Correo electrónico</label>
-              <input
-                id="perfil-email"
-                name="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com"
-                autoComplete="email"
-              />
-              {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
+                <div className="perfil-field">
+                  <label htmlFor="perfil-email">Correo electrónico</label>
+                  <input
+                    id="perfil-email"
+                    name="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tu@email.com"
+                    autoComplete="email"
+                  />
+                  {fieldErrors.email && <p className="field-error">{fieldErrors.email}</p>}
+                </div>
+              </div>
             </fieldset>
 
             <fieldset className="perfil-fieldset">
@@ -181,47 +187,55 @@ function PerfilCuenta() {
                 Para cambiar el correo o la contraseña, ingresa tu contraseña actual.
               </p>
 
-              <label htmlFor="perfil-password-actual">Contraseña actual</label>
-              <input
-                id="perfil-password-actual"
-                name="passwordActual"
-                type="password"
-                value={passwordActual}
-                onChange={(e) => setPasswordActual(e.target.value)}
-                placeholder="Solo si cambias email o contraseña"
-                autoComplete="current-password"
-              />
-              {fieldErrors.passwordActual && (
-                <p className="field-error">{fieldErrors.passwordActual}</p>
-              )}
+              <div className="perfil-fields-grid perfil-fields-grid--stacked">
+                <div className="perfil-field perfil-field--full">
+                  <label htmlFor="perfil-password-actual">Contraseña actual</label>
+                  <input
+                    id="perfil-password-actual"
+                    name="passwordActual"
+                    type="password"
+                    value={passwordActual}
+                    onChange={(e) => setPasswordActual(e.target.value)}
+                    placeholder="Solo si cambias email o contraseña"
+                    autoComplete="current-password"
+                  />
+                  {fieldErrors.passwordActual && (
+                    <p className="field-error">{fieldErrors.passwordActual}</p>
+                  )}
+                </div>
 
-              <label htmlFor="perfil-password-nueva">Nueva contraseña</label>
-              <input
-                id="perfil-password-nueva"
-                name="passwordNueva"
-                type="password"
-                value={passwordNueva}
-                onChange={(e) => setPasswordNueva(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
-                autoComplete="new-password"
-              />
-              {fieldErrors.passwordNueva && (
-                <p className="field-error">{fieldErrors.passwordNueva}</p>
-              )}
+                <div className="perfil-field">
+                  <label htmlFor="perfil-password-nueva">Nueva contraseña</label>
+                  <input
+                    id="perfil-password-nueva"
+                    name="passwordNueva"
+                    type="password"
+                    value={passwordNueva}
+                    onChange={(e) => setPasswordNueva(e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    autoComplete="new-password"
+                  />
+                  {fieldErrors.passwordNueva && (
+                    <p className="field-error">{fieldErrors.passwordNueva}</p>
+                  )}
+                </div>
 
-              <label htmlFor="perfil-password-confirmar">Confirmar nueva contraseña</label>
-              <input
-                id="perfil-password-confirmar"
-                name="confirmarPasswordNueva"
-                type="password"
-                value={confirmarPasswordNueva}
-                onChange={(e) => setConfirmarPasswordNueva(e.target.value)}
-                placeholder="Repite la nueva contraseña"
-                autoComplete="new-password"
-              />
-              {fieldErrors.confirmarPasswordNueva && (
-                <p className="field-error">{fieldErrors.confirmarPasswordNueva}</p>
-              )}
+                <div className="perfil-field">
+                  <label htmlFor="perfil-password-confirmar">Confirmar nueva contraseña</label>
+                  <input
+                    id="perfil-password-confirmar"
+                    name="confirmarPasswordNueva"
+                    type="password"
+                    value={confirmarPasswordNueva}
+                    onChange={(e) => setConfirmarPasswordNueva(e.target.value)}
+                    placeholder="Repite la nueva contraseña"
+                    autoComplete="new-password"
+                  />
+                  {fieldErrors.confirmarPasswordNueva && (
+                    <p className="field-error">{fieldErrors.confirmarPasswordNueva}</p>
+                  )}
+                </div>
+              </div>
             </fieldset>
 
             <div className="perfil-form-actions">

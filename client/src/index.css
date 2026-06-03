@@ -1731,15 +1731,25 @@ body {
   align-items: center;
 }
 
+.perfil-page .panel-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
 .perfil-layout {
   display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 1.5rem;
   align-items: start;
 }
 
 .perfil-resumen {
   text-align: center;
+  padding: 1.5rem 1.25rem;
 }
 
 .perfil-resumen h3 {
@@ -1786,36 +1796,118 @@ body {
   color: var(--text-secondary);
 }
 
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 1.5rem;
+  min-width: 0;
+}
+
 .perfil-fieldset {
   border: none;
-  margin: 0 0 1.25rem;
-  padding: 0;
+  margin: 0;
+  padding: 0 0 1.5rem;
+}
+
+.perfil-fieldset + .perfil-fieldset {
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--bg-alt);
 }
 
 .perfil-fieldset legend {
-  font-size: 1rem;
+  display: block;
+  width: 100%;
+  font-size: 1.05rem;
   font-weight: 600;
   margin-bottom: 0.35rem;
+  padding: 0;
+  color: var(--text-primary);
 }
 
 .perfil-fieldset-hint {
-  margin: 0 0 0.85rem;
-  font-size: 0.82rem;
+  margin: 0 0 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
   color: var(--text-tertiary);
 }
 
+.perfil-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+}
+
+.perfil-fields-grid--stacked .perfil-field--full {
+  grid-column: 1 / -1;
+}
+
+.perfil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.perfil-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.perfil-field input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--surface-high);
+  font-family: var(--font);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+  outline: none;
+}
+
+.perfil-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.perfil-field .field-error {
+  margin: 0;
+}
+
 .perfil-form-actions {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--bg-alt);
 }
 
 .perfil-form-actions .btn-primary {
   width: 100%;
-  max-width: 280px;
+  max-width: 320px;
+}
+
+@media (max-width: 900px) {
+  .perfil-fields-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .perfil-fields-grid--stacked .perfil-field--full {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 768px) {
   .perfil-layout {
     grid-template-columns: 1fr;
+  }
+
+  .perfil-form {
+    padding: 1.25rem;
   }
 }
 
